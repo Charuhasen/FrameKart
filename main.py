@@ -1,24 +1,28 @@
-from turtle import width
 import cv2
 import tkinter as tk 
 from tkinter import *
 from PIL import Image, ImageTk
 
-
 def createwidgets():
+    optionList = ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6"]
+    
     global cameralabel
     cameralabel = Label(root, borderwidth=3, relief="groove", bg="white")
     cameralabel.grid(row=0, column=0)
 
-    recommendationlabel = Label(root, borderwidth=3, relief="groove", text="Recommendation", bg="white", fg="black", font=("Comic Sans MS", 18))
-    recommendationlabel.place(in_= cameralabel, relx = 1.0, rely = 0.0, anchor = NE)
-
-    recommendationList = Listbox(root)
-    recommendationList.insert(0, recommendationlabel, "Option 2")
-    recommendationList.place(in_= cameralabel, relx = 1.0, rely = 0.04, anchor = NE)
-
     captureBtn = Button(root, text = "Capture", command=capture, bg="Lightblue", width= 20, font=("Comic Sans MS", 15))
-    captureBtn.place(in_= cameralabel, relx = 0.5, rely = 1.0, anchor = S)
+    captureBtn.place(in_= cameralabel, relx = 0.5, rely = 1.0, anchor = S, y= -20)
+
+    frame = Frame(root, bg="white")
+    frame.grid(row=0, column=1, sticky=NW)
+
+    recommendationlabel = Label(frame, borderwidth=3, relief="groove", text="Recommendation", bg="white", fg="black", font=("Comic Sans MS", 18))
+    recommendationlabel.pack(side=TOP)
+    
+    recommendationList = Listbox(frame, bg="white", fg="black", selectmode=SINGLE)
+    for item in optionList:
+        recommendationList.insert(0, item)
+    recommendationList.pack(side=TOP)
 
     #-------------------------------------------------------------
     # recommendationText = Text(root, height = 5, width = 52)
@@ -30,8 +34,16 @@ def createwidgets():
 
     showfeed()
 
+def rescale_frame(frame, percent=75):
+    width = int(frame.shape[1] * percent/ 100)
+    # height = int(frame.shape[0] * percent/ 100)
+    height = root.winfo_screenheight()
+    dim = (width, height)
+    return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
+
 def showfeed():
     ret, frame = root.cap.read()
+    frame = rescale_frame(frame, percent = 90)
     global cameralabel
 
     if ret:
@@ -49,7 +61,6 @@ def showfeed():
         cameralabel.configure(image= "")
 
 def capture():
-
     fileName = 'FaceImage.jpg'
     ret, frame = root.cap.read()
     cv2.imwrite(fileName, frame)
@@ -68,17 +79,17 @@ def capture():
 
 root = tk.Tk()
 
-width, height = root.winfo_screenwidth(), root.winfo_screenheight()
+# width, height = root.winfo_screenwidth()*0.5, root.winfo_screenheight()*0.5
 
 root.cap = cv2.VideoCapture(0)
 
 # width, height = 30,30
-root.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-root.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+# root.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+# root.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 root.title("FrameKart")
-root.geometry("1440x900")
-# root.attributes('-fullscreen', True)
+# root.geometry("1440x900")
+root.attributes('-fullscreen', True)
 root.config(background = "white")
 
 createwidgets()
